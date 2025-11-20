@@ -6,16 +6,16 @@ S7 plc 없이도, 로컬에서 사용할 수 있는 테스터가 필요했습니
 - Float
 - String
 # How to use
-1. 서버 띄우기 <br/>
-   (docker 설치 필요) <br/>
+**1. 서버 띄우기** <br/>
+   (docker 설치 필요) <br/> <br/>
    1-1. cmd 창에 입력 <br/>
-   `docker run -p 8080:8080 -p 8443:443 -p 102:102 --name softplc fbarresi/softplc:latest-linux` <br/>
+   `docker run -p 8080:8080 -p 8443:443 -p 102:102 --name softplc fbarresi/softplc:latest-linux` <br/><br/>
    1-2. swagger 띄우기 <br/>
-   http://localhost:8080/index.html <br/>
-2. Swagger 에서 사용할 Datablock 을 생성 <br/>
+   http://localhost:8080/index.html <br/> <br/>
+**2. Swagger 에서 사용할 Datablock 을 생성** <br/>
    <img width="1348" height="798" alt="image" src="https://github.com/user-attachments/assets/50c008fb-9f6e-4889-976a-61fbf1d4bae1" />
    <img width="1348" height="798" alt="image" src="https://github.com/user-attachments/assets/67aee86f-88b8-4206-8e52-ea4f2944f6eb" />
     <br/>
-3. 테스터 앱 실행 <br/>
+**3. 테스터 앱 실행** <br/> <br/>
    <img width="1186" height="543" alt="image" src="https://github.com/user-attachments/assets/ecf578ad-11e0-4997-aaff-a555f3f4c497" />
 (여기에서의 size 는 string 타입일때의 size 입니다.)
