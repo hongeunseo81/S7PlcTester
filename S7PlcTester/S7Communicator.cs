@@ -133,12 +133,12 @@ namespace S7PlcTester
                     return _readBuf.GetRealAt(0);
                 case PlcDataType.String:
                     
-                    if (_client.DBRead(readBlockNum, 0, size, _readBuf) != 0)
+                    if (_client.DBRead(readBlockNum, 0, size * 2, _readBuf) != 0)
                     {
                         Console.WriteLine("PLC Read String Failed");
                         return null;
                     }
-                    var result = Encoding.ASCII.GetString(_readBuf, 0, size);
+                    var result = Encoding.ASCII.GetString(_readBuf, 0, size * 2);
                     return result.TrimEnd('\0');
             }
             return null;

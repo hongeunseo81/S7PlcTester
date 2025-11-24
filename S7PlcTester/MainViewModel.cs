@@ -160,7 +160,7 @@ namespace S7PlcTester.ViewModels
         {
             if (_plcComm != null)
             {
-                object? value = await _plcComm.ReadPlcAsync(SelectedEndian,SelectedReadDataType, ReadBlock, ReadIndex,ReadSize);
+                object? value = await _plcComm.ReadPlcAsync(SelectedEndian,SelectedReadDataType, ReadBlock, ReadIndex, ReadSize);
                 if(value != null) 
                 {
                     ReadValue = value.ToString();
