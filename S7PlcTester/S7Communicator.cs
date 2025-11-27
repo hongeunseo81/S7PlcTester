@@ -16,8 +16,6 @@ namespace S7PlcTester
         private int _slot;
 
         private S7Client _client = new();
-        private int _readDbNum;
-        private int _writeDbNum;
 
         private byte[] _readBuf = new byte[128];
         private byte[] _writeBuf = new byte[128];
@@ -125,7 +123,7 @@ namespace S7PlcTester
                         return _readBuf.GetWordAt(0);
                     }
                 case PlcDataType.Float:
-                    if (_client.DBRead(readBlockNum, 0, 4, _readBuf) != 0)
+                    if (_client.DBRead(readBlockNum, pos, 4, _readBuf) != 0)
                     {
                         Console.WriteLine("PLC Read Float Failed");
                         return null;
@@ -133,7 +131,7 @@ namespace S7PlcTester
                     return _readBuf.GetRealAt(0);
                 case PlcDataType.String:
                     
-                    if (_client.DBRead(readBlockNum, 0, size * 2, _readBuf) != 0)
+                    if (_client.DBRead(readBlockNum, pos, size * 2, _readBuf) != 0)
                     {
                         Console.WriteLine("PLC Read String Failed");
                         return null;
@@ -159,10 +157,6 @@ namespace S7PlcTester
                     _writeSignalBuf.SetBitAt(0, pos, val);
                     ret = _client.DBWrite(writeBlockNum, 0, 1, _writeSignalBuf);
                     break;
-                case PlcDataType.Float when float.TryParse(value, out float val):
-                    _writeBuf.SetRealAt(0, val);
-                    ret = _client.DBWrite(writeBlockNum, 0, 4, _writeBuf);
-                    break;
                 case PlcDataType.Int when short.TryParse(value, out short val):
                     ushort raw = (ushort)val;
 
@@ -172,6 +166,10 @@ namespace S7PlcTester
                     }
                     _writeBuf.SetUIntAt(0, raw);
                     ret = _client.DBWrite(writeBlockNum, pos, 2, _writeBuf);
+                    break;
+                case PlcDataType.Float when float.TryParse(value, out float val):
+                    _writeBuf.SetRealAt(0, val);
+                    ret = _client.DBWrite(writeBlockNum, pos, 4, _writeBuf);
                     break;
                 case PlcDataType.String:
                     string text = value;

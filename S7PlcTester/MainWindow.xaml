@@ -170,7 +170,7 @@
                         Margin="5"
                         VerticalAlignment="Center"
                         FontSize="16"
-                        Text="Index" />
+                        Text="Pos" />
                     <TextBox
                         Grid.Row="1"
                         Grid.Column="1"
@@ -278,7 +278,7 @@
                         Margin="5"
                         VerticalAlignment="Center"
                         FontSize="16"
-                        Text="Index" />
+                        Text="Pos" />
                     <TextBox
                         Grid.Row="1"
                         Grid.Column="1"
