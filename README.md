@@ -21,4 +21,4 @@ S7 plc 없이도, 로컬에서 사용할 수 있는 테스터가 필요했습니
    <br/><br/>
 **3. 테스터 앱 실행** <br/> <br/>
    <img width="1186" height="543" alt="image" src="https://github.com/user-attachments/assets/ecf578ad-11e0-4997-aaff-a555f3f4c497" />
-(여기에서의 size 는 string 타입일때의 size 입니다.)
+(여기에서의 size 는 string 타입일때의 size 입니다. ex. Size 가 2라면 4글자)
