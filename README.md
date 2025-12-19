@@ -16,9 +16,9 @@ S7 plc 없이도, 로컬에서 사용할 수 있는 테스터가 필요했습니
    
 **3. 테스터 앱 실행** <br/> <br/>
    <img width="1186" height="543" alt="image" src="https://github.com/user-attachments/assets/ecf578ad-11e0-4997-aaff-a555f3f4c497" />
- size 는 byte 단위 입니다. <br/>
-   - Bool (1byte)
-   - Int (2byte)
-   - Float (4byte)
-   - String (N byte)
+ size 는 word 단위 입니다. <br/>
+   - Bool (1 word)
+   - Int (1 word)
+   - Float (2 word)
+   - String (N word)
    <br/><br/>
