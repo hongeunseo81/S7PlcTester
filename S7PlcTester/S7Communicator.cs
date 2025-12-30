@@ -95,24 +95,25 @@ namespace S7PlcTester
             throw new NotImplementedException();
         }
 
-        public object? ReadPlc(EndianType endianType, PlcDataType dataType, int readBlockNum, int pos, int size = 0)
+        public object? ReadPlc(EndianType endianType, PlcDataType dataType, int readBlockNum, int readBase, int pos, int size = 0)
         {
+            Console.WriteLine($"Read PLC : write DB Num : {readBlockNum} / base: {readBase}  /  pos : {pos} ");
             switch (dataType) 
             {
                 case PlcDataType.Bool:
-                    if (_client.DBRead(readBlockNum, 0, 1, _readBuf) != 0)
+                    if (_client.DBRead(readBlockNum, readBase, 1, _readBuf) != 0)
                     {
                         Console.WriteLine("PLC Read Bit Failed");
                         return null;
                     }
                     return _readBuf.GetBitAt(0, pos);
                 case PlcDataType.Int:
-                    if (_client.DBRead(readBlockNum, pos, 2, _readBuf) != 0)
+                    if (_client.DBRead(readBlockNum, readBase + pos, 2, _readBuf) != 0)
                     {
                         Console.WriteLine($"PLC Read Int Failed, dbNum: {readBlockNum}, pos:{pos}");
                         return null;
                     }
-                    if (endianType == EndianType.Little) 
+                    if (endianType == EndianType.Big) 
                     {
                         int low = _readBuf[0];
                         int high = _readBuf[1];
@@ -123,7 +124,7 @@ namespace S7PlcTester
                         return _readBuf.GetWordAt(0);
                     }
                 case PlcDataType.Float:
-                    if (_client.DBRead(readBlockNum, pos, 4, _readBuf) != 0)
+                    if (_client.DBRead(readBlockNum, readBase + pos, 4, _readBuf) != 0)
                     {
                         Console.WriteLine("PLC Read Float Failed");
                         return null;
@@ -131,7 +132,7 @@ namespace S7PlcTester
                     return _readBuf.GetRealAt(0);
                 case PlcDataType.String:
                     
-                    if (_client.DBRead(readBlockNum, pos, size * 2, _readBuf) != 0)
+                    if (_client.DBRead(readBlockNum, readBase + pos, size * 2, _readBuf) != 0)
                     {
                         Console.WriteLine("PLC Read String Failed");
                         return null;
@@ -142,25 +143,25 @@ namespace S7PlcTester
             return null;
         }
 
-        public Task<object?> ReadPlcAsync(EndianType endianType, PlcDataType dataType, int readBlockNum, int pos, int size = 0)
+        public Task<object?> ReadPlcAsync(EndianType endianType, PlcDataType dataType, int readBlockNum, int readBase, int pos, int size = 0)
         {
-            return Task.Run(() => ReadPlc(endianType,dataType, readBlockNum, pos, size));
+            return Task.Run(() => ReadPlc(endianType,dataType, readBlockNum, readBase, pos, size));
         }
 
-        public bool WritePlc(EndianType endianType, PlcDataType dataType, int writeBlockNum, int pos, string value, int size = 0)
+        public bool WritePlc(EndianType endianType, PlcDataType dataType, int writeBlockNum, int writeBase, int pos, string value, int size = 0)
         {
             int ret = -1;
-            Console.WriteLine($"WRITE PLC : write DB Num : {writeBlockNum}  /  pos : {pos} / val : {value}");
+            Console.WriteLine($"WRITE PLC : write DB Num : {writeBlockNum} / base: {writeBase}  /  pos : {pos} / val : {value}");
             switch (dataType)
             {
                 case PlcDataType.Bool when bool.TryParse(value, out bool val):
                     _writeSignalBuf.SetBitAt(0, pos, val);
-                    ret = _client.DBWrite(writeBlockNum, 0, 1, _writeSignalBuf);
+                    ret = _client.DBWrite(writeBlockNum, writeBase, 1, _writeSignalBuf);
                     break;
                 case PlcDataType.Int when short.TryParse(value, out short val):
                     ushort raw = (ushort)val;
 
-                    if (endianType == EndianType.Little)
+                    if (endianType == EndianType.Big)
                     {
                         raw = (ushort)((raw >> 8) | (raw << 8));
                     }
@@ -169,7 +170,7 @@ namespace S7PlcTester
                     break;
                 case PlcDataType.Float when float.TryParse(value, out float val):
                     _writeBuf.SetRealAt(0, val);
-                    ret = _client.DBWrite(writeBlockNum, pos, 4, _writeBuf);
+                    ret = _client.DBWrite(writeBlockNum, writeBase + pos, 4, _writeBuf);
                     break;
                 case PlcDataType.String:
                     string text = value;
@@ -177,7 +178,7 @@ namespace S7PlcTester
                     _writeBuf = new byte[raws.Length];
                     Array.Copy(raws, _writeBuf, raws.Length);
 
-                    ret = _client.DBWrite(writeBlockNum, pos, raws.Length, _writeBuf);
+                    ret = _client.DBWrite(writeBlockNum, writeBase + pos, raws.Length, _writeBuf);
                     break;
             }
             if (ret == 0)
@@ -192,10 +193,10 @@ namespace S7PlcTester
             }
         }
 
-        public Task<bool> WritePlcAsync(EndianType endianType, PlcDataType dataType, int writeBlockNum, int pos, string value, int size = 0)
+        public Task<bool> WritePlcAsync(EndianType endianType, PlcDataType dataType, int writeBlockNum, int writeBase, int pos, string value, int size = 0)
         {
 
-            return Task.Run(() => WritePlc(endianType, dataType, writeBlockNum, pos, value, size));
+            return Task.Run(() => WritePlc(endianType, dataType, writeBlockNum, writeBase, pos, value, size));
         }
 
 

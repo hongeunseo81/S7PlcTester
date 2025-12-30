@@ -126,6 +126,16 @@ namespace S7PlcTester.ViewModels
             }
         }
 
+        private int _readBase;
+        public int ReadBase
+        {
+            get => _readBase;
+            set
+            {
+                SetProperty(ref _readBase, value);
+            }
+        }
+
         private int _readIndex;
         public int ReadIndex
         {
@@ -160,7 +170,7 @@ namespace S7PlcTester.ViewModels
         {
             if (_plcComm != null)
             {
-                object? value = await _plcComm.ReadPlcAsync(SelectedEndian,SelectedReadDataType, ReadBlock, ReadIndex, ReadSize);
+                object? value = await _plcComm.ReadPlcAsync(SelectedEndian,SelectedReadDataType, ReadBlock, ReadBase, ReadIndex, ReadSize);
                 if(value != null) 
                 {
                     ReadValue = value.ToString();
@@ -196,6 +206,15 @@ namespace S7PlcTester.ViewModels
                 SetProperty(ref _writeBlock, value);
             }
         }
+        private int _writeBase;
+        public int WriteBase
+        {
+            get => _writeBase;
+            set
+            {
+                SetProperty(ref _writeBase, value);
+            }
+        }
         private int _writeIndex;
         public int WriteIndex
         {
@@ -229,7 +248,7 @@ namespace S7PlcTester.ViewModels
         {
             if (_plcComm != null)
             {
-                _plcComm.WritePlcAsync(SelectedEndian, SelectedWriteDataType, WriteBlock, WriteIndex, WriteValue, WriteSize);
+                _plcComm.WritePlcAsync(SelectedEndian, SelectedWriteDataType, WriteBlock, WriteBase, WriteIndex, WriteValue, WriteSize);
             }
         });
 

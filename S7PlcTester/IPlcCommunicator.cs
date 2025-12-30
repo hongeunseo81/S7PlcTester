@@ -18,9 +18,9 @@ namespace S7PlcTester
 
         Task<bool> ConnectAsync();
         Task<bool> DisconnectAsync();
-        bool WritePlc(EndianType endianType,PlcDataType dataType, int writeBlockNum, int pos, string value, int size = 0);
-        Task<bool> WritePlcAsync(EndianType endianType, PlcDataType dataType, int writeBlockNum, int pos, string value, int size = 0);
-        object? ReadPlc(EndianType endianType, PlcDataType dataType, int readBlockNum, int pos, int size = 0);
-        Task<object?> ReadPlcAsync(EndianType endianType, PlcDataType dataType, int readBlockNum, int pos, int size = 0);
+        bool WritePlc(EndianType endianType,PlcDataType dataType, int writeBlockNum, int writeBase, int pos, string value, int size = 0);
+        Task<bool> WritePlcAsync(EndianType endianType, PlcDataType dataType, int writeBlockNum, int writeBase, int pos, string value, int size = 0);
+        object? ReadPlc(EndianType endianType, PlcDataType dataType, int readBlockNum, int readBase, int pos, int size = 0);
+        Task<object?> ReadPlcAsync(EndianType endianType, PlcDataType dataType, int readBlockNum, int readBase, int pos, int size = 0);
     }
 }

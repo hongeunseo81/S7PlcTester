@@ -132,16 +132,43 @@
                         Margin="5,0,0,0"
                         VerticalAlignment="Center"
                         FontSize="16"
-                        Text="🧱 ReadBlock" />
-                    <TextBox
-                        Grid.Row="1"
-                        Width="170"
-                        Height="30"
-                        Margin="5,0,0,0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        FontSize="16"
-                        Text="{Binding ReadBlock}" />
+                        Text="🧱 Read" />
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <TextBlock
+                            Width="100"
+                            Height="30"
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            Text="DataBlock" />
+                        <TextBox
+                            Width="170"
+                            Height="30"
+                            Margin="5,0,10,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            Text="{Binding ReadBlock}" />
+                        <TextBlock
+                            Width="50"
+                            Height="30"
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            Text="Base" />
+                        <TextBox
+                            Grid.Row="1"
+                            Width="170"
+                            Height="30"
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            Text="{Binding ReadBase}" />
+                    </StackPanel>
+
                 </Grid>
                 <Grid>
                     <Grid.RowDefinitions>
@@ -240,16 +267,43 @@
                         Margin="5,0,0,0"
                         VerticalAlignment="Center"
                         FontSize="16"
-                        Text="🧱 WriteBlock" />
-                    <TextBox
-                        Grid.Row="1"
-                        Width="170"
-                        Height="30"
-                        Margin="5,0,0,0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        FontSize="16"
-                        Text="{Binding WriteBlock}" />
+                        Text="🧱 Write" />
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <TextBlock
+                            Width="100"
+                            Height="30"
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            Text="DataBlock" />
+                        <TextBox
+                            Width="170"
+                            Height="30"
+                            Margin="5,0,10,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            Text="{Binding WriteBlock}" />
+                        <TextBlock
+                            Width="50"
+                            Height="30"
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            Text="Base" />
+                        <TextBox
+                            Grid.Row="1"
+                            Width="170"
+                            Height="30"
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            Text="{Binding WriteBase}" />
+                    </StackPanel>
+
                 </Grid>
                 <Grid>
                     <Grid.RowDefinitions>
