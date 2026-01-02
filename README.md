@@ -15,7 +15,11 @@ S7 plc 없이도, 로컬에서 사용할 수 있는 테스터가 필요했습니
     <br/>
    
 **3. 테스터 앱 실행** <br/> <br/>
-   <img width="1186" height="543" alt="image" src="https://github.com/user-attachments/assets/ecf578ad-11e0-4997-aaff-a555f3f4c497" />
+- 연결 시도
+<img width="1186" height="574" alt="image" src="https://github.com/user-attachments/assets/a0861af6-7b7c-41ec-af29-09dfe183d538" />
+- 주소, 타입, 사이즈, 값 입력
+<img width="1186" height="574" alt="image" src="https://github.com/user-attachments/assets/1df5a0d1-e3f8-42d3-980f-6b0625ef8442" />
+
  size 는 word 단위 입니다. <br/>
    - Bool (1 word)
    - Int (1 word)
