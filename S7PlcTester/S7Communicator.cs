@@ -101,12 +101,15 @@ namespace S7PlcTester
             switch (dataType) 
             {
                 case PlcDataType.Bool:
-                    if (_client.DBRead(readBlockNum, readBase, 1, _readBuf) != 0)
+                    // pos is absolute bit address (e.g., pos:9 = byte 1, bit 1)
+                    int readByteOffset = pos / 8;
+                    int readBitIndex = pos % 8;
+                    if (_client.DBRead(readBlockNum, readBase + readByteOffset, 1, _readBuf) != 0)
                     {
                         Console.WriteLine("PLC Read Bit Failed");
                         return null;
                     }
-                    return _readBuf.GetBitAt(0, pos);
+                    return _readBuf.GetBitAt(0, readBitIndex);
                 case PlcDataType.Int:
                     if (_client.DBRead(readBlockNum, readBase + pos, 2, _readBuf) != 0)
                     {
@@ -155,8 +158,17 @@ namespace S7PlcTester
             switch (dataType)
             {
                 case PlcDataType.Bool when bool.TryParse(value, out bool val):
-                    _writeSignalBuf.SetBitAt(0, pos, val);
-                    ret = _client.DBWrite(writeBlockNum, writeBase, 1, _writeSignalBuf);
+                    // pos is absolute bit address (e.g., pos:9 = byte 1, bit 1)
+                    int writeByteOffset = pos / 8;
+                    int writeBitIndex = pos % 8;
+                    // Read current byte first to preserve other bits
+                    if (_client.DBRead(writeBlockNum, writeBase + writeByteOffset, 1, _writeSignalBuf) != 0)
+                    {
+                        Console.WriteLine("PLC Read before Write Failed");
+                        break;
+                    }
+                    _writeSignalBuf.SetBitAt(0, writeBitIndex, val);
+                    ret = _client.DBWrite(writeBlockNum, writeBase + writeByteOffset, 1, _writeSignalBuf);
                     break;
                 case PlcDataType.Int when short.TryParse(value, out short val):
                     ushort raw = (ushort)val;
