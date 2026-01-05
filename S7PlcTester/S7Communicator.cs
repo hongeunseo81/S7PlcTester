@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static S7PlcTester.ViewModels.MainViewModel;
-
 namespace S7PlcTester
 {
     public class S7Communicator : IPlcCommunicator, IDisposable
