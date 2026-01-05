@@ -1,280 +1,150 @@
-﻿
-
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using S7PlcTester.Enums;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+using System.Collections.ObjectModel;
 
 namespace S7PlcTester.ViewModels
 {
-    public partial class MainViewModel : INotifyPropertyChanged
+    public partial class MainViewModel : ObservableObject
     {
-        private IPlcCommunicator _plcComm;
+        private IPlcCommunicator? _plcComm;
+
         #region ConnectInfo
+        [ObservableProperty]
         private string _ip = "127.0.0.1";
-        public string Ip
-        {
-            get => _ip;
-            set
-            {
-                SetProperty(ref _ip, value);
-            }
-        }
 
+        [ObservableProperty]
         private string _port = "102";
-        public string Port
-        {
-            get => _port;
-            set
-            {
-                SetProperty(ref _port, value);
-            }
-        }
 
+        [ObservableProperty]
         private string _slot = "0";
-        public string Slot
-        {
-            get => _slot;
-            set
-            {
-                SetProperty(ref _slot, value);
-            }
-        }
 
+        [ObservableProperty]
         private string _rack = "0";
-        public string Rack
-        {
-            get => _rack;
-            set
-            {
-                SetProperty(ref _rack, value);
-            }
-        }
 
-        private bool _isConnected = false;
-        public bool IsConnected
-        {
-            get => _isConnected;
-            set
-            {
-                SetProperty(ref _isConnected, value);
-                ConnectState = IsConnected ? "💡 연결 됨 💡" : "☠️ 연결 안됨 ☠️";
-            }
-        }
+        [ObservableProperty]
+        private bool _isConnected;
+
+        [ObservableProperty]
         private string _connectState = "☠️ 연결 안됨 ☠️";
-        public string ConnectState
+
+        partial void OnIsConnectedChanged(bool value)
         {
-            get => _connectState;
-            set
-            {
-                SetProperty(ref _connectState, value);
-            }
+            ConnectState = value ? "💡 연결 됨 💡" : "☠️ 연결 안됨 ☠️";
         }
 
         [RelayCommand]
-        private async Task OnConnect()
+        private async Task Connect()
         {
-            _plcComm = new S7Communicator(_ip, _rack, _slot);
+            _plcComm = new S7Communicator(Ip, Rack, Slot);
             IsConnected = await _plcComm.ConnectAsync();
         }
 
         [RelayCommand]
-        private async Task OnDisconnect()
+        private async Task Disconnect()
         {
-            if(_plcComm != null)
+            if (_plcComm != null)
             {
                 await _plcComm.DisconnectAsync();
+                IsConnected = _plcComm.IsConnected;
+                return;
             }
-            IsConnected = _plcComm.IsConnected;
+
+            IsConnected = false;
         }
         #endregion
 
-        #region Read data
-        public IEnumerable<PlcDataType> ReadDataTypes { get; }
+        public IEnumerable<PlcDataType> DataTypes { get; }
             = Enum.GetValues(typeof(PlcDataType)).Cast<PlcDataType>();
 
-        private PlcDataType _selectedReadDataType;
-        public PlcDataType SelectedReadDataType
-        {
-            get => _selectedReadDataType;
-            set
-            {
-                SetProperty(ref _selectedReadDataType, value);
-            }
-        }
-        public enum EndianType { Little, Big }
+        public IEnumerable<EndianType> EndianTypes { get; }
+            = Enum.GetValues(typeof(EndianType)).Cast<EndianType>();
 
-        private EndianType _selectedEndian = EndianType.Little;
-        public EndianType SelectedEndian
-        {
-            get => _selectedEndian;
-            set
-            {
-                _selectedEndian = value;
-                SetProperty(ref _selectedEndian, value);
-            }
-        }
+        public ObservableCollection<PlcOperationViewModel> Operations { get; } = [];
 
-        private int _readBlock;
-        public int ReadBlock
+        [RelayCommand]
+        private void AddOperation()
         {
-            get => _readBlock;
-            set
+            if (Operations.Count == 0)
             {
-                SetProperty(ref _readBlock, value);
+                Operations.Add(new PlcOperationViewModel());
             }
-        }
-
-        private int _readBase;
-        public int ReadBase
-        {
-            get => _readBase;
-            set
+            else
             {
-                SetProperty(ref _readBase, value);
-            }
-        }
-
-        private int _readIndex;
-        public int ReadIndex
-        {
-            get => _readIndex;
-            set
-            {
-                SetProperty(ref _readIndex, value); 
-            }
-        }
-        private int _readSize;
-        public int ReadSize
-        {
-            get => _readSize;
-            set
-            {
-                SetProperty(ref _readSize, value);
-            }
-        }
-
-        private string _readValue;
-        public string ReadValue
-        {
-            get => _readValue;
-            set
-            {
-                SetProperty(ref _readValue, value);
+                var last = Operations[^1];
+                Operations.Add(new PlcOperationViewModel
+                {
+                    OperationType = last.OperationType,
+                    PlcDataType = last.PlcDataType,
+                    EndianType = last.EndianType,
+                    Block = last.Block,
+                    Base = last.Base,
+                    Index = last.Index,
+                    Size = last.Size,
+                    WriteValue = last.WriteValue,
+                    ReadValue = last.ReadValue
+                });
             }
         }
 
         [RelayCommand]
-        private async Task OnReadData()
+        private void RemoveOperation(PlcOperationViewModel? operation)
         {
-            if (_plcComm != null)
+            if (operation == null)
             {
-                object? value = await _plcComm.ReadPlcAsync(SelectedEndian,SelectedReadDataType, ReadBlock, ReadBase, ReadIndex, ReadSize);
-                if(value != null) 
+                return;
+            }
+
+            Operations.Remove(operation);
+        }
+
+        [RelayCommand]
+        private async Task ExecuteOperation(PlcOperationViewModel? operation)
+        {
+            if (operation == null || _plcComm == null || !IsConnected)
+            {
+                return;
+            }
+
+            try
+            {
+                switch (operation.OperationType)
                 {
-                    ReadValue = value.ToString();
+                    case OperationType.Read:
+                        object? value = await _plcComm.ReadPlcAsync(
+                            operation.EndianType,
+                            operation.PlcDataType,
+                            operation.Block,
+                            operation.Base,
+                            operation.Index,
+                            operation.Size);
+
+                        if (value != null)
+                        {
+                            operation.ReadValue = value.ToString() ?? string.Empty;
+                        }
+                        else
+                        {
+                            operation.ReadValue = string.Empty;
+                        }
+
+                        break;
+                    case OperationType.Write:
+                        bool success = await _plcComm.WritePlcAsync(
+                            operation.EndianType,
+                            operation.PlcDataType,
+                            operation.Block,
+                            operation.Base,
+                            operation.Index,
+                            operation.WriteValue,
+                            operation.Size);
+                        break;
                 }
-                else
-                {
-                    Console.WriteLine("PLC Read Failed");
-                }
             }
-        }
-
-        #endregion
-
-        #region Write data
-        public IEnumerable<PlcDataType> WriteDataTypes { get; }
-            = Enum.GetValues(typeof(PlcDataType)).Cast<PlcDataType>();
-
-        private PlcDataType _selectedWriteDataType;
-        public PlcDataType SelectedWriteDataType
-        {
-            get => _selectedWriteDataType;
-            set
+            catch (Exception ex)
             {
-                SetProperty(ref _selectedWriteDataType, value);
+                Console.WriteLine(ex.Message);
             }
-        }
-        private int _writeBlock;
-        public int WriteBlock
-        {
-            get => _writeBlock;
-            set
-            {
-                SetProperty(ref _writeBlock, value);
-            }
-        }
-        private int _writeBase;
-        public int WriteBase
-        {
-            get => _writeBase;
-            set
-            {
-                SetProperty(ref _writeBase, value);
-            }
-        }
-        private int _writeIndex;
-        public int WriteIndex
-        {
-            get => _writeIndex;
-            set
-            {
-                SetProperty(ref _writeIndex, value);
-            }
-        }
-        private int _writeSize;
-        public int WriteSize
-        {
-            get => _writeSize;
-            set
-            {
-                SetProperty(ref _writeSize, value);
-            }
-        }
-
-        private string _writeValue;
-        public string WriteValue
-        {
-            get => _writeValue;
-            set
-            {
-                SetProperty(ref _writeValue, value);
-            }
-        }
-        private RelayCommand _writeDataCommand;
-        public ICommand WriteDataCommand => _writeDataCommand ??= new RelayCommand(() =>
-        {
-            if (_plcComm != null)
-            {
-                _plcComm.WritePlcAsync(SelectedEndian, SelectedWriteDataType, WriteBlock, WriteBase, WriteIndex, WriteValue, WriteSize);
-            }
-        });
-
-        #endregion
-
-        public MainViewModel()
-        {
-
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void RaisePropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "")
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value))
-            {
-                return false;
-            }
-
-            field = value;
-            RaisePropertyChanged(propertyName);
-            return true;
         }
     }
 }
