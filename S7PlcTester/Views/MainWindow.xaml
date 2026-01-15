@@ -37,9 +37,11 @@
             <Style.Triggers>
                 <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Write}">
                     <Setter Property="Background" Value="#47C2FF" />
+                    <Setter Property="Content" Value="Write" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Read}">
                     <Setter Property="Background" Value="#FFCC00" />
+                    <Setter Property="Content" Value="Read" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -248,7 +250,7 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding Success}" Value="True">
                                                 <Setter Property="BorderBrush" Value="#4CAF50"/>
-                                                <Setter Property="Background" Value="#F1F8F4"/>
+                                                <Setter Property="Background" Value="#F1F8F4"/>                                                
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Success}" Value="False">
                                                 <Setter Property="BorderBrush" Value="#F44336"/>
@@ -355,8 +357,7 @@
                                             Padding="12,4"
                                             Style="{StaticResource ExecuteButtonStyle}"
                                             Command="{Binding DataContext.ExecuteSignalCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                            CommandParameter="{Binding Path=.}"
-                                            Content="Execute"/>
+                                            CommandParameter="{Binding Path=.}"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>
