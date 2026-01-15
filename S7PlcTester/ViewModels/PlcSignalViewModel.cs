@@ -3,20 +3,20 @@ using S7PlcTester.Enums;
 
 namespace S7PlcTester.ViewModels
 {
-    public partial class PlcOperationViewModel : ObservableObject
+    public partial class PlcSignalViewModel : ObservableObject
     {
-        public PlcOperationViewModel()
+        public PlcSignalViewModel()
         {
-            OperationType = OperationType.Read;
+            SignalType = SignalType.Read;
             PlcDataType = PlcDataType.Bool;
             EndianType = EndianType.Little;
         }
 
-        public string OperationTypeGroupName { get; } = $"OperationType_{Guid.NewGuid():N}";
+        public string SignalTypeGroupName { get; } = $"SignalType_{Guid.NewGuid():N}";
         public string EndianGroupName { get; } = $"Endian_{Guid.NewGuid():N}";
 
         [ObservableProperty]
-        private OperationType _operationType;
+        private SignalType _signalType;
 
         [ObservableProperty]
         private PlcDataType _plcDataType;
@@ -41,5 +41,8 @@ namespace S7PlcTester.ViewModels
 
         [ObservableProperty]
         private string _readValue = string.Empty;
+
+        [ObservableProperty]
+        private bool? _success = null;
     }
 }

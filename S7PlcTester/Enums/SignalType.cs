@@ -1,6 +1,6 @@
 namespace S7PlcTester.Enums
 {
-    public enum OperationType
+    public enum SignalType
     {
         Read,
         Write

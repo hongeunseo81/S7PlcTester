@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using S7PlcTester.Enums;
+using S7PlcTester.Plc;
 using System.Collections.ObjectModel;
 
 namespace S7PlcTester.ViewModels
@@ -17,21 +18,16 @@ namespace S7PlcTester.ViewModels
         private string _port = "102";
 
         [ObservableProperty]
-        private string _slot = "0";
+        private string _slot = "1";
 
         [ObservableProperty]
         private string _rack = "0";
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(AddSignalCommand))]
+        [NotifyCanExecuteChangedFor(nameof(DisconnectCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ExecuteSignalCommand))]
         private bool _isConnected;
-
-        [ObservableProperty]
-        private string _connectState = "☠️ 연결 안됨 ☠️";
-
-        partial void OnIsConnectedChanged(bool value)
-        {
-            ConnectState = value ? "💡 연결 됨 💡" : "☠️ 연결 안됨 ☠️";
-        }
 
         [RelayCommand]
         private async Task Connect()
@@ -40,10 +36,10 @@ namespace S7PlcTester.ViewModels
             IsConnected = await _plcComm.ConnectAsync();
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(IsConnected))]
         private async Task Disconnect()
         {
-            if (_plcComm != null)
+            if (_plcComm is not null)
             {
                 await _plcComm.DisconnectAsync();
                 IsConnected = _plcComm.IsConnected;
@@ -60,21 +56,21 @@ namespace S7PlcTester.ViewModels
         public IEnumerable<EndianType> EndianTypes { get; }
             = Enum.GetValues(typeof(EndianType)).Cast<EndianType>();
 
-        public ObservableCollection<PlcOperationViewModel> Operations { get; } = [];
+        public ObservableCollection<PlcSignalViewModel> Signals { get; } = [];
 
-        [RelayCommand]
-        private void AddOperation()
+        [RelayCommand(CanExecute = nameof(IsConnected))]
+        private void AddSignal()
         {
-            if (Operations.Count == 0)
+            if (Signals.Count == 0)
             {
-                Operations.Add(new PlcOperationViewModel());
+                Signals.Add(new PlcSignalViewModel());
             }
             else
             {
-                var last = Operations[^1];
-                Operations.Add(new PlcOperationViewModel
+                var last = Signals[^1];
+                Signals.Add(new PlcSignalViewModel
                 {
-                    OperationType = last.OperationType,
+                    SignalType = last.SignalType,
                     PlcDataType = last.PlcDataType,
                     EndianType = last.EndianType,
                     Block = last.Block,
@@ -88,61 +84,56 @@ namespace S7PlcTester.ViewModels
         }
 
         [RelayCommand]
-        private void RemoveOperation(PlcOperationViewModel? operation)
+        private void RemoveSignal(PlcSignalViewModel? signal)
         {
-            if (operation == null)
+            if (signal is null)
             {
                 return;
             }
 
-            Operations.Remove(operation);
+            Signals.Remove(signal);
         }
 
-        [RelayCommand]
-        private async Task ExecuteOperation(PlcOperationViewModel? operation)
+        [RelayCommand(CanExecute = nameof(IsConnected))]
+        private async Task ExecuteSignal(PlcSignalViewModel? signal)
         {
-            if (operation == null || _plcComm == null || !IsConnected)
+            if (signal is null || _plcComm is null || !IsConnected)
             {
                 return;
             }
 
             try
             {
-                switch (operation.OperationType)
+                switch (signal.SignalType)
                 {
-                    case OperationType.Read:
+                    case SignalType.Read:
                         object? value = await _plcComm.ReadPlcAsync(
-                            operation.EndianType,
-                            operation.PlcDataType,
-                            operation.Block,
-                            operation.Base,
-                            operation.Index,
-                            operation.Size);
+                            signal.EndianType,
+                            signal.PlcDataType,
+                            signal.Block,
+                            signal.Base,
+                            signal.Index,
+                            signal.Size);
 
-                        if (value != null)
-                        {
-                            operation.ReadValue = value.ToString() ?? string.Empty;
-                        }
-                        else
-                        {
-                            operation.ReadValue = string.Empty;
-                        }
-
+                        signal.Success = value is not null;
+                        signal.ReadValue = value?.ToString() ?? string.Empty;
                         break;
-                    case OperationType.Write:
-                        bool success = await _plcComm.WritePlcAsync(
-                            operation.EndianType,
-                            operation.PlcDataType,
-                            operation.Block,
-                            operation.Base,
-                            operation.Index,
-                            operation.WriteValue,
-                            operation.Size);
+
+                    case SignalType.Write:
+                        signal.Success = await _plcComm.WritePlcAsync(
+                            signal.EndianType,
+                            signal.PlcDataType,
+                            signal.Block,
+                            signal.Base,
+                            signal.Index,
+                            signal.WriteValue,
+                            signal.Size);
                         break;
                 }
             }
             catch (Exception ex)
             {
+                signal.Success = false;
                 Console.WriteLine(ex.Message);
             }
         }
