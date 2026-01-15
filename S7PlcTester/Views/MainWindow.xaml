@@ -17,31 +17,22 @@
         <converter:BooleanInverseConverter x:Key="BooleanInverseConverter" />
         <converter:StringEqualsConverter x:Key="StringEqualsConverter" />
         <converter:RadioEqualsConverter x:Key="RadioEqualsConverter" />
-        <Style x:Key="ReadOnlyVisibilityStyle" TargetType="FrameworkElement">
-            <Setter Property="Visibility" Value="Collapsed" />
+        
+        <!-- Visibility Styles -->
+        <Style x:Key="ConnectedVisibilityStyle" TargetType="Button">
+            <Setter Property="Visibility" Value="Collapsed"/>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Read}">
-                    <Setter Property="Visibility" Value="Visible" />
+                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="WriteOnlyVisibilityStyle" TargetType="FrameworkElement">
-            <Setter Property="Visibility" Value="Collapsed" />
+        
+        <Style x:Key="DisconnectedVisibilityStyle" TargetType="Button">
+            <Setter Property="Visibility" Value="Collapsed"/>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Write}">
-                    <Setter Property="Visibility" Value="Visible" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="ExecuteButtonStyle" TargetType="Button">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Write}">
-                    <Setter Property="Background" Value="#47C2FF" />
-                    <Setter Property="Content" Value="Write" />
-                </DataTrigger>
-                <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Read}">
-                    <Setter Property="Background" Value="#FFCC00" />
-                    <Setter Property="Content" Value="Read" />
+                <DataTrigger Binding="{Binding IsConnected}" Value="False">
+                    <Setter Property="Visibility" Value="Visible"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -133,35 +124,15 @@
                         Margin="8"
                         Content="Disconnect"
                         Background="White"
-                        Command="{Binding DisconnectCommand}">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsConnected}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
+                        Style="{StaticResource ConnectedVisibilityStyle}"
+                        Command="{Binding DisconnectCommand}" />
                     <Button 
                         Margin="8"
                         Content="Connect"
                         Background="#F05353"
                         Foreground="White"
-                        Command="{Binding ConnectCommand}">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsConnected}" Value="False">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
+                        Style="{StaticResource DisconnectedVisibilityStyle}"
+                        Command="{Binding ConnectCommand}" />
                 </Grid>
                 <Grid Margin="4">
                     <TextBlock 
@@ -239,6 +210,36 @@
                 <ItemsControl ItemsSource="{Binding Signals}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
+                            <DataTemplate.Resources>
+                                <Style x:Key="ReadOnlyVisibilityStyle" TargetType="FrameworkElement">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Read}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                                <Style x:Key="WriteOnlyVisibilityStyle" TargetType="FrameworkElement">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Write}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                                <Style x:Key="ExecuteButtonStyle" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Write}">
+                                            <Setter Property="Background" Value="#47C2FF" />
+                                            <Setter Property="Content" Value="Write" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Read}">
+                                            <Setter Property="Background" Value="#FFCC00" />
+                                            <Setter Property="Content" Value="Read" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataTemplate.Resources>
                             <Border Margin="4"
                                     Padding="4, 8"
                                     BorderThickness="2"
