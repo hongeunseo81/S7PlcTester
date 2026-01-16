@@ -1,0 +1,370 @@
+<Window
+    x:Class="S7PlcTester.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converter="clr-namespace:S7PlcTester.Converters"
+    xmlns:enum="clr-namespace:S7PlcTester.Enums"
+    xmlns:viewmodel="clr-namespace:S7PlcTester.ViewModels"
+    Title="S7 Tester"
+    Width="1080"
+    Height="960"
+    d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <converter:BooleanConverter x:Key="BooleanConverter" />
+        <converter:BooleanInverseConverter x:Key="BooleanInverseConverter" />
+        <converter:StringEqualsConverter x:Key="StringEqualsConverter" />
+        <converter:RadioEqualsConverter x:Key="RadioEqualsConverter" />
+        
+        <!-- Visibility Styles -->
+        <Style x:Key="ConnectedVisibilityStyle" TargetType="Button">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="DisconnectedVisibilityStyle" TargetType="Button">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsConnected}" Value="False">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        
+        <!-- Connect Info -->
+        <TextBlock 
+            Grid.Row="0"
+            Grid.Column="0"
+            Margin="8"
+            FontSize="16"
+            FontWeight="Bold"
+            VerticalAlignment="Center"
+            Text="Connect Info" />
+        
+        <Grid Grid.Row="1" Grid.Column="0">
+            <StackPanel>
+                <Grid Margin="4" IsEnabled="{Binding IsConnected, Converter={StaticResource BooleanInverseConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Margin="10"
+                        FontSize="20"
+                        Text="IP" />
+                    <TextBox
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Margin="10"
+                        FontSize="20"
+                        Text="{Binding Ip}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Margin="10"
+                        FontSize="20"
+                        Text="PORT" />
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="10"
+                        FontSize="20"
+                        Text="{Binding Port}" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Margin="10"
+                        FontSize="20"
+                        Text="SLOT" />
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Margin="10"
+                        FontSize="20"
+                        Text="{Binding Slot}" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Margin="10"
+                        FontSize="20"
+                        Text="RACK" />
+                    <TextBox
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Margin="10"
+                        FontSize="20"
+                        Text="{Binding Rack}" />
+                </Grid>
+                <Grid Margin="4" Height="64">
+                    <Button 
+                        Margin="8"
+                        Content="Disconnect"
+                        Background="White"
+                        Style="{StaticResource ConnectedVisibilityStyle}"
+                        Command="{Binding DisconnectCommand}" />
+                    <Button 
+                        Margin="8"
+                        Content="Connect"
+                        Background="#F05353"
+                        Foreground="White"
+                        Style="{StaticResource DisconnectedVisibilityStyle}"
+                        Command="{Binding ConnectCommand}" />
+                </Grid>
+                <Grid Margin="4">
+                    <TextBlock 
+                        Margin="16"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="32">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="☠️ 연결 안됨 ☠️" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                        <Setter Property="Text" Value="💡 연결 됨 💡" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Signals -->
+        <Grid Grid.Row="0" Grid.Column="1" Margin="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock 
+                Grid.Column="0"
+                Margin="8"
+                FontSize="16"
+                FontWeight="Bold"
+                VerticalAlignment="Center"
+                Text="Signals" />
+            <Button
+                Grid.Column="2"
+                Margin="4"
+                Padding="32,16"
+                Background="#cccccc"
+                Command="{Binding AddSignalCommand}"
+                Content="Add Signal" />
+        </Grid>
+        
+        <Grid Grid.Row="1" Grid.Column="1">
+            <!-- 빈 상태 표시 -->
+            <Border Background="#F8F8F8" 
+                    CornerRadius="8"
+                    Margin="4">
+                <StackPanel HorizontalAlignment="Center" 
+                            VerticalAlignment="Center">
+                    <TextBlock Text="등록된 시그널이 없습니다" 
+                            FontSize="20"
+                            Foreground="#999"
+                            HorizontalAlignment="Center"/>
+                    <TextBlock Text="'Add Signal' 버튼을 눌러 시그널을 추가해주세요" 
+                            FontSize="14"
+                            Foreground="#BBB"
+                            Margin="0,8,0,0"
+                            HorizontalAlignment="Center"/>
+                </StackPanel>
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Signals.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            </Border>
+            <ScrollViewer Margin="4" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Signals}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <DataTemplate.Resources>
+                                <Style x:Key="ReadOnlyVisibilityStyle" TargetType="FrameworkElement">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Read}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                                <Style x:Key="WriteOnlyVisibilityStyle" TargetType="FrameworkElement">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Write}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                                <Style x:Key="ExecuteButtonStyle" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Write}">
+                                            <Setter Property="Background" Value="#47C2FF" />
+                                            <Setter Property="Content" Value="Write" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SignalType}" Value="{x:Static enum:SignalType.Read}">
+                                            <Setter Property="Background" Value="#FFCC00" />
+                                            <Setter Property="Content" Value="Read" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataTemplate.Resources>
+                            <Border Margin="4"
+                                    Padding="4, 8"
+                                    BorderThickness="2"
+                                    CornerRadius="8">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="BorderBrush" Value="#D0D0D0"/>
+                                        <Setter Property="Background" Value="White"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Success}" Value="True">
+                                                <Setter Property="BorderBrush" Value="#4CAF50"/>
+                                                <Setter Property="Background" Value="#F1F8F4"/>                                                
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Success}" Value="False">
+                                                <Setter Property="BorderBrush" Value="#F44336"/>
+                                                <Setter Property="Background" Value="#FFEBEE"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="120"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid Grid.Column="0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Delete, Select Signal Mode, Address Inputs -->
+                                        <Grid Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" 
+                                                    Margin="8, 4" 
+                                                    Padding="8, 4"
+                                                    Background="#F05353"
+                                                    Command="{Binding DataContext.RemoveSignalCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="Delete"
+                                                    Foreground="White" />
+                                            <RadioButton Grid.Column="1" 
+                                                         VerticalAlignment="Center"
+                                                         Margin="8, 4" 
+                                                         Content="Read"
+                                                         GroupName="{Binding SignalTypeGroupName}"
+                                                         IsChecked="{Binding SignalType, Mode=TwoWay, Converter={StaticResource RadioEqualsConverter}, ConverterParameter=Read}" />
+                                            <RadioButton Grid.Column="2" 
+                                                         VerticalAlignment="Center"
+                                                         Margin="8, 4" 
+                                                         Content="Write"
+                                                         GroupName="{Binding SignalTypeGroupName}"
+                                                         IsChecked="{Binding SignalType, Mode=TwoWay, Converter={StaticResource RadioEqualsConverter}, ConverterParameter=Write}" />
+                                            <StackPanel Margin="8, 4"  Grid.Column="3" >
+                                                <TextBlock Text="DataBlock" />
+                                                <TextBox Width="64" Text="{Binding Block}" />
+                                            </StackPanel>
+                                            <StackPanel Margin="8, 4"  Grid.Column="4" >
+                                                <TextBlock FontSize="12" Text="Base" />
+                                                <TextBox Width="64" Text="{Binding Base}" />
+                                            </StackPanel>
+                                            <StackPanel Margin="8, 4"  Grid.Column="5" >
+                                                <TextBlock FontSize="12" Text="Pos" />
+                                                <TextBox Width="64" Text="{Binding Index}" />
+                                            </StackPanel>
+                                            <StackPanel Margin="8, 4"  Grid.Column="6" >
+                                                <TextBlock FontSize="12" Text="Size" />
+                                                <TextBox Width="64" Text="{Binding Size}" />
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <!-- Data Inputs -->
+                                        <WrapPanel Grid.Row="1">
+                                            <StackPanel Margin="8, 0">
+                                                <TextBlock FontSize="12" Text="Type" />
+                                                <ComboBox Width="110"
+                                                          ItemsSource="{Binding DataContext.DataTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          SelectedItem="{Binding PlcDataType}" />
+                                            </StackPanel>
+                                            <StackPanel Margin="8, 0" Style="{StaticResource WriteOnlyVisibilityStyle}">
+                                                <TextBlock FontSize="12" Text="Value" />
+                                                <TextBox Width="180" Text="{Binding WriteValue}" />
+                                            </StackPanel>
+                                            <StackPanel Margin="8, 0" Style="{StaticResource ReadOnlyVisibilityStyle}">
+                                                <TextBlock FontSize="12" Text="Value" />
+                                                <TextBox Width="180" IsReadOnly="True" Text="{Binding ReadValue}" />
+                                            </StackPanel>
+                                            <StackPanel Margin="8, 0">
+                                                <TextBlock FontSize="12" Text="Endian" />
+                                                <StackPanel Orientation="Horizontal">
+                                                    <RadioButton Margin="0,0,8,0"
+                                                                 Content="Little"
+                                                                 GroupName="{Binding EndianGroupName}"
+                                                                 IsChecked="{Binding EndianType, Mode=TwoWay, Converter={StaticResource RadioEqualsConverter}, ConverterParameter=Little}" />
+                                                    <RadioButton Content="Big"
+                                                                 GroupName="{Binding EndianGroupName}"
+                                                                 IsChecked="{Binding EndianType, Mode=TwoWay, Converter={StaticResource RadioEqualsConverter}, ConverterParameter=Big}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </WrapPanel>
+                                    </Grid>
+
+                                    <!-- Execute Button -->
+                                    <Button Grid.Column="1"
+                                            Margin="10,0,0,0"
+                                            Padding="12,4"
+                                            Style="{StaticResource ExecuteButtonStyle}"
+                                            Command="{Binding DataContext.ExecuteSignalCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding Path=.}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>
